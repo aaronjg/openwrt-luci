@@ -5,7 +5,8 @@
 local dsp = require "luci.dispatcher"
 local util   = require("luci.util")
 
-local m, mwan_rule, src_ip, src_port, dest_ip, dest_port, proto, sticky
+
+local m, mwan_rule, src_ip, src_iface, src_port, dest_ip, dest_port, proto, sticky
 local timeout, ipset, logging, policy
 
 arg[1] = arg[1] or ""
@@ -18,6 +19,19 @@ m.redirect = dsp.build_url("admin", "network", "mwan", "rule")
 mwan_rule = m:section(NamedSection, arg[1], "rule", "")
 mwan_rule.addremove = false
 mwan_rule.dynamic = false
+
+
+proto = mwan_rule:option(Value, "family", translate("Family"),
+	translate("Rule family - any, ipv4 or ipv6"))
+proto.default = "any"
+proto.rmempty = false
+proto:value("any")
+proto:value("ipv4")
+proto:value("ipv6")
+
+
+src_iface = mwan_rule:option(Value, "src_iface", translate("Source interface"), translate("UCI Network"))
+src_iface.datatype = network
 
 src_ip = mwan_rule:option(Value, "src_ip", translate("Source address"),
 	translate("Supports CIDR notation (eg \"192.168.100.0/24\") without quotes"))

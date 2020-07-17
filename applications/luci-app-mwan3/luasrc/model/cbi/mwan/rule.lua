@@ -5,7 +5,7 @@
 local dsp = require "luci.dispatcher"
 local uci = require "uci"
 
-local m, mwan_rule, src_ip, src_port, dest_ip, dest_port, proto, use_policy
+local m, mwan_rule, src_iface, src_ip, src_port, dest_ip, dest_port, proto, use_policy
 
 function ruleCheck()
 	local rule_error = {}
@@ -64,6 +64,18 @@ function mwan_rule.create(self, section)
 	TypedSection.create(self, section)
 	m.uci:save("mwan3")
 	luci.http.redirect(dsp.build_url("admin", "network", "mwan", "rule", section))
+end
+
+family = mwan_rule:option(DummyValue, "family", translate("Family"))
+family.rawhtml = true
+function family.cfgvalue(self, s)
+	return self.map:get(s, "family") or "any"
+end
+
+src_iface = mwan_rule:option(DummyValue, "src_iface", translate("Source interface"))
+src_iface.rawhtml = true
+function src_iface.cfgvalue(self, s)
+	return self.map:get(s, "src_iface") or "&#8212;"
 end
 
 src_ip = mwan_rule:option(DummyValue, "src_ip", translate("Source address"))
